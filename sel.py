@@ -83,8 +83,8 @@ if 'Average Sentiment' in d.find_elements_by_class_name("MuiTableRow-root")[0].t
 
 if 'data.csv' in os.listdir(os.getcwd()):
     df = pd.read_csv('data.csv')
-    df_new = df_new.dropna(subset=['exchange'])
-    df.reset_index(drop=True, inplace=True)
+    df = df.dropna(subset=['exchange'])
+    df = df.reset_index(drop=True)
     df = df.assign(social_score_change=0)
     if 'social_score_old' in df.columns:
         for i in range(len(df)):
