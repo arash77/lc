@@ -65,25 +65,17 @@ if 'Average Sentiment' in d.find_elements_by_class_name("MuiTableRow-root")[0].t
         df_old = df_old.drop(['ID_old'], axis='columns', errors='ignore')
         df_old = df_old.rename({'ID': 'ID_old'}, axis='columns')
         df_new = df_new.set_index(['coin']).combine_first(df_old.set_index(['coin'])).reset_index()
+        
     Markets = dict()
     for exchange in ['coinex','binance','huobipro']:
         try:
-            markets_tmp = getattr(ccxt, exchange)({'timeout': 5000,'enableRateLimit': True}).fetchMarkets()
-            coins_tmp = list()
-            for market in markets_tmp:
-                if market['quote'] == "USDT":
-                    coins_tmp.append(market['base'])
-            Markets[exchange] = coins_tmp
+            Markets[exchange] = [market['base'] for market in getattr(ccxt, exchange)({'timeout': 5000,'enableRateLimit': True}).fetchMarkets() if market['quote'] == "USDT"]
         except:
             print("ERR NO TICKER", time.ctime())
     df_new = df_new.assign(exchange=None)
     for i in range(len(df_new)):
-        exch_tmp=list()
-        for exch, j in Markets.items():
-            if df_new.loc[i, 'coin'] in j: exch_tmp.append(exch)
-        df_new.loc[i, 'exchange'] = ",".join(exch_tmp)
-    df_new = df_new.dropna(subset=['exchange'])
-    
+        df_new.loc[i, 'exchange'] = ",".join([exch for exch, j in Markets.items() if df_new.loc[i, 'coin'] in j])
+
     df_new.to_csv('data.csv',index=False)
     print(df_new)
 
@@ -91,7 +83,8 @@ if 'Average Sentiment' in d.find_elements_by_class_name("MuiTableRow-root")[0].t
 
 if 'data.csv' in os.listdir(os.getcwd()):
     df = pd.read_csv('data.csv')
-
+    df.reset_index(drop=True, inplace=True)
+    df_new = df_new.dropna(subset=['exchange'])
     df = df.assign(social_score_change=0)
     if 'social_score_old' in df.columns:
         for i in range(len(df)):
