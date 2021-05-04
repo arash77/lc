@@ -88,6 +88,7 @@ if 'Average Sentiment' in d.find_elements_by_class_name("MuiTableRow-root")[0].t
     print(df_new)
 
 
+
 if 'data.csv' in os.listdir(os.getcwd()):
     df = pd.read_csv('data.csv')
 
