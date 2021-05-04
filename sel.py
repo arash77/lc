@@ -82,7 +82,7 @@ if 'Average Sentiment' in d.find_elements_by_class_name("MuiTableRow-root")[0].t
         for exch, j in Markets.items():
             if df_new.loc[i, 'coin'] in j: exch_tmp.append(exch)
         df_new.loc[i, 'exchange'] = ",".join(exch_tmp)
-    df_new.dropna(subset=['exchange'],inplace=True)
+    df_new = df_new.dropna(subset=['exchange'])
     
     df_new.to_csv('data.csv',index=False)
     print(df_new)
