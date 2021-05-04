@@ -99,9 +99,8 @@ if 'data.csv' in os.listdir(os.getcwd()):
     df = df.sort_values("rate",ascending=False,ignore_index=True)
     df.insert(0, 'ID', range(1, 1+len(df)))
     if 'ID_old' in df.columns:
+        df.rename({'ID_change': 'ID_2change'}, axis='columns')
         for i in range(len(df)):
-            if 'ID_change' in df.columns:
-                df.loc[i, 'ID_2change'] = df.loc[i, 'ID_change']
             df.loc[i, 'ID_change'] = (df.loc[i, 'ID_old'] - df.loc[i, 'ID'])
     df = df.assign(new_rate=0)
     if 'social_score_change_percent' in df.columns and 'ID_change' in df.columns:
