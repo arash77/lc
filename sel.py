@@ -31,8 +31,6 @@ while True:
         time.sleep(5)
     except Exception as e:
         print(e, time.ctime())
-        d.close()
-        d.quit()
         d = webdriver.Chrome(chrome_options=chrome_options)
         d.get("https://lunarcrush.com/markets?rpp=1")
     check = WebDriverWait(d, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableRow-root'))).text.splitlines()
@@ -47,6 +45,8 @@ while True:
         flag = True
     else:
         theList = WebDriverWait(d, 300).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableBody-root'))).text.splitlines()
+        d.close()
+        d.quit()
         if 'COIN OF THE DAY' in theList: theList.remove('COIN OF THE DAY')
         data_of_web = list()
         list_of_coins = [theList[n:n+7] for n in range(0, len(theList), 7)]
@@ -98,12 +98,9 @@ while True:
             for i in range(len(df)):
                 if df.loc[i, 'social_score_old']!=0:
                     df.loc[i, 'social_score_change'] = (df.loc[i, 'social_score'] - df.loc[i, 'social_score_old']) 
-                    if ('social_score_change_percent' in df.columns) :
-                        if df.loc[i, 'social_score_change_percent'] != np.nan:
-                            df.loc[i, 'social_score_change_percent'] = ((df.loc[i, 'social_score_change'] * 100 / df.loc[i, 'social_score_old'])+df.loc[i, 'social_score_change_percent'])/2
-                        else:
-                            df.loc[i, 'social_score_change_percent'] = (df.loc[i, 'social_score_change'] * 100 / df.loc[i, 'social_score_old'])   
-                    else:
+                    try:
+                        df.loc[i, 'social_score_change_percent'] = ((df.loc[i, 'social_score_change'] * 100 / df.loc[i, 'social_score_old']) + df.loc[i, 'social_score_change_percent']) / 2
+                    except:
                         df.loc[i, 'social_score_change_percent'] = (df.loc[i, 'social_score_change'] * 100 / df.loc[i, 'social_score_old'])
         df = df.assign(rate=0)
         for rank, asc in [["galaxy_score",False],["BullBear",False]]:
