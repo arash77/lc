@@ -22,12 +22,12 @@ chrome_options.add_experimental_option("detach", True)
 
 
 while True:
+    global d
     try:
         d.get("https://lunarcrush.com/markets?rpp=1")
     except:
         d.close()
         d.quit()
-        global d
         d = webdriver.Chrome(chrome_options=chrome_options)
         d.get("https://lunarcrush.com/markets?rpp=1")
     check = WebDriverWait(d, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableRow-root'))).text.splitlines()
