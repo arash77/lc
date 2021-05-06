@@ -8,6 +8,7 @@ import time
 import pandas as pd
 import os
 import ccxt
+import numpy as np
 
 chrome_options = Options()
 chrome_options.add_argument('--headless')
@@ -89,10 +90,16 @@ if 'data.csv' in os.listdir(os.getcwd()):
     if 'social_score_old' in df.columns:
         for i in range(len(df)):
             if df.loc[i, 'social_score_old']!=0:
-                df.loc[i, 'social_score_change'] = (df.loc[i, 'social_score'] - df.loc[i, 'social_score_old'])
-                df.loc[i, 'social_score_change_percent'] = df.loc[i, 'social_score_change'] * 100 / df.loc[i, 'social_score_old']
+                df.loc[i, 'social_score_change'] = (df.loc[i, 'social_score'] - df.loc[i, 'social_score_old']) 
+                if ('social_score_change_percent' in df.columns) :
+                    if df.loc[i, 'social_score_change_percent'] != np.nan:
+                        df.loc[i, 'social_score_change_percent'] = ((df.loc[i, 'social_score_change'] * 100 / df.loc[i, 'social_score_old'])+df.loc[i, 'social_score_change_percent'])/2
+                    else:
+                        df.loc[i, 'social_score_change_percent'] = (df.loc[i, 'social_score_change'] * 100 / df.loc[i, 'social_score_old'])   
+                else:
+                    df.loc[i, 'social_score_change_percent'] = (df.loc[i, 'social_score_change'] * 100 / df.loc[i, 'social_score_old'])
     df = df.assign(rate=0)
-    for rank, asc in [["galaxy_score",False],["average_sentiment",False],["BullBear",False]]:
+    for rank, asc in [["galaxy_score",False],["BullBear",False]]:
         df = df.sort_values(rank,ascending=asc,ignore_index=True)
         for i in range(len(df)):
             df.loc[i, 'rate'] += (len(df)-i)
@@ -102,13 +109,13 @@ if 'data.csv' in os.listdir(os.getcwd()):
         df.rename({'ID_change': 'ID_2change'}, axis='columns')
         for i in range(len(df)):
             df.loc[i, 'ID_change'] = (df.loc[i, 'ID_old'] - df.loc[i, 'ID'])
-    df = df.assign(new_rate=0)
-    if 'social_score_change_percent' in df.columns and 'ID_change' in df.columns:
-        for rank, asc in [["social_score_change_percent",False],["ID_change",False]]:
-            df = df.sort_values(rank,ascending=asc,ignore_index=True)
-            for i in range(len(df)):
-                df.loc[i, 'new_rate'] += (len(df)-i)
-        df = df.sort_values("new_rate",ascending=False,ignore_index=True)
+    # df = df.assign(new_rate=0)
+    # if 'social_score_change_percent' in df.columns and 'ID_change' in df.columns:
+    #     for rank, asc in [["social_score_change_percent",False],["ID_change",False]]:
+    #         df = df.sort_values(rank,ascending=asc,ignore_index=True)
+    #         for i in range(len(df)):
+    #             df.loc[i, 'new_rate'] += (len(df)-i)
+    #     df = df.sort_values("new_rate",ascending=False,ignore_index=True)
     
     print(df.head(30))
     df.to_csv('data.csv',index=False)
