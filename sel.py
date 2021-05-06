@@ -28,7 +28,8 @@ while True:
             d.get("https://lunarcrush.com/markets?tv=gt_500k&rpp=500&ob=bullish_sentiment")
         else:
             d.get("https://lunarcrush.com/markets?rpp=1")
-    except:
+    except Exception as e:
+        print(e, time.ctime())
         d.close()
         d.quit()
         d = webdriver.Chrome(chrome_options=chrome_options)
@@ -82,8 +83,8 @@ while True:
         for exchange in ['coinex','binance','huobipro']:
             try:
                 Markets[exchange] = [market['base'] for market in getattr(ccxt, exchange)({'timeout': 5000,'enableRateLimit': True}).fetchMarkets() if market['quote'] == "USDT"]
-            except:
-                print("ERR NO TICKER", time.ctime())
+            except Exception as e:
+                print(e, time.ctime())
         df_new = df_new.assign(exchange=None)
         for i in range(len(df_new)):
             df_new.loc[i, 'exchange'] = ",".join([exch for exch, j in Markets.items() if df_new.loc[i, 'coin'] in j])
