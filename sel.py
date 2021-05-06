@@ -28,7 +28,7 @@ while True:
             d.get("https://lunarcrush.com/markets?tv=gt_500k&rpp=500&ob=bullish_sentiment")
         else:
             d.get("https://lunarcrush.com/markets?rpp=1")
-        time.sleep(1)
+        time.sleep(5)
     except Exception as e:
         print(e, time.ctime())
         d.close()
@@ -46,7 +46,7 @@ while True:
         time.sleep(10)
         flag = True
     else:
-        theList = WebDriverWait(d, 200).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableBody-root'))).text.splitlines()
+        theList = WebDriverWait(d, 300).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableBody-root'))).text.splitlines()
         if 'COIN OF THE DAY' in theList: theList.remove('COIN OF THE DAY')
         data_of_web = list()
         list_of_coins = [theList[n:n+7] for n in range(0, len(theList), 7)]
