@@ -28,6 +28,7 @@ while True:
             d.get("https://lunarcrush.com/markets?tv=gt_500k&rpp=500&ob=bullish_sentiment")
         else:
             d.get("https://lunarcrush.com/markets?rpp=1")
+        time.sleep(1)
     except Exception as e:
         print(e, time.ctime())
         d.close()
@@ -49,7 +50,7 @@ while True:
         if 'COIN OF THE DAY' in theList: theList.remove('COIN OF THE DAY')
         data_of_web = list()
         list_of_coins = [theList[n:n+7] for n in range(0, len(theList), 7)]
-        print(list_of_coins, time.ctime())
+        print(list_of_coins[-1], time.ctime())
         for i in list_of_coins:
             try:
                 if 'N/A' in i[6].split()[9]:
@@ -69,7 +70,7 @@ while True:
                         )
                     )
             except Exception as e:
-                print(e)
+                print(e, time.ctime())
         df_new = pd.DataFrame(data_of_web)
         if 'data.csv' in os.listdir(os.getcwd()):
             df_old = pd.read_csv('data.csv')
