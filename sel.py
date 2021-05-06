@@ -89,7 +89,7 @@ while True:
         df_new = df_new.assign(exchange=None)
         for i in range(len(df_new)):
             df_new.loc[i, 'exchange'] = ",".join([exch for exch, j in Markets.items() if df_new.loc[i, 'coin'] in j])
-        df_new = df_new['exchange'].replace('', np.nan)
+        df_new['exchange'].replace('', np.nan, inplace=True)
         df_new = df_new.dropna(subset=['exchange'])
 
         df = df_new.reset_index(drop=True)
