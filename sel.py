@@ -20,10 +20,14 @@ chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
 chrome_options.add_experimental_option("detach", True)
 d = webdriver.Chrome(chrome_options=chrome_options)
+flag = False
 
 while True:
     try:
-        d.get("https://lunarcrush.com/markets?rpp=1")
+        if flag:
+            d.get("https://lunarcrush.com/markets?tv=gt_500k&rpp=500&ob=bullish_sentiment")
+        else:
+            d.get("https://lunarcrush.com/markets?rpp=1")
     except:
         d.close()
         d.quit()
@@ -38,9 +42,8 @@ while True:
         d.find_element_by_id("password").send_keys("arash1377")
         d.find_element_by_xpath("//button[@type='submit']").click()
         time.sleep(10)
+        flag = True
     else:
-        d.get("https://lunarcrush.com/markets?tv=gt_500k&rpp=500&ob=bullish_sentiment")
-        time.sleep(1)
         theList = WebDriverWait(d, 200).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableBody-root'))).text.splitlines()
         if 'COIN OF THE DAY' in theList: theList.remove('COIN OF THE DAY')
         data_of_web = list()
