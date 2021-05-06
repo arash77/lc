@@ -34,7 +34,7 @@ while True:
         d = webdriver.Chrome(chrome_options=chrome_options)
         d.get("https://lunarcrush.com/markets?rpp=1")
     check = WebDriverWait(d, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableRow-root'))).text.splitlines()
-    print(check)
+    print(check, time.ctime())
     if 'Average Sentiment' not in check:
         d.find_elements_by_class_name("MuiButtonBase-root")[9].click()
         WebDriverWait(d, 30).until(EC.presence_of_element_located((By.ID, 'email')))
@@ -47,7 +47,9 @@ while True:
         theList = WebDriverWait(d, 200).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableBody-root'))).text.splitlines()
         if 'COIN OF THE DAY' in theList: theList.remove('COIN OF THE DAY')
         data_of_web = list()
-        for i in [theList[n:n+7] for n in range(0, len(theList), 7)]:
+        list_of_coins = [theList[n:n+7] for n in range(0, len(theList), 7)]
+        print(list_of_coins, time.ctime())
+        for i in list_of_coins:
             try:
                 if 'N/A' in i[6].split()[9]:
                     z = i[6].split()
@@ -113,7 +115,7 @@ while True:
             for i in range(len(df)):
                 df.loc[i, 'ID_change'] = (df.loc[i, 'ID_old'] - df.loc[i, 'ID'])
         
-        print(df.head(30))
+        print(df.head(30), time.ctime())
         df.to_csv('data.csv',index=False)
         r.set('records',pickle.dumps(df[['coin', 'BullBear', 'exchange', 'galaxy_score', 'rate', 'social_score']].to_dict('records')))
         # pickle.loads(r.get('records'))
