@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.remote.command import Command
 import time
 import pandas as pd
 import os
@@ -24,15 +25,12 @@ flag = False
 
 while True:
     try:
-        if flag:
-            d.get("https://lunarcrush.com/markets?tv=gt_500k&rpp=500&ob=bullish_sentiment")
-        else:
-            d.get("https://lunarcrush.com/markets?rpp=1")
-        time.sleep(5)
+        d.execute(Command.STATUS)
     except Exception as e:
         print(e, time.ctime())
         d = webdriver.Chrome(chrome_options=chrome_options)
-        d.get("https://lunarcrush.com/markets?rpp=1")
+    d.get("https://lunarcrush.com/markets?tv=gt_500k&rpp=500&ob=bullish_sentiment")
+    time.sleep(5)
     check = WebDriverWait(d, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableRow-root'))).text.splitlines()
     print(check, time.ctime())
     if 'Average Sentiment' not in check:
@@ -46,7 +44,6 @@ while True:
         flag = True
     else:
         theList = WebDriverWait(d, 300).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableBody-root'))).text.splitlines()
-        d.close()
         d.quit()
         if 'COIN OF THE DAY' in theList: theList.remove('COIN OF THE DAY')
         data_of_web = list()
@@ -56,7 +53,7 @@ while True:
             for i in list_of_coins:
                 if 'N/A' in i[6].split()[9]:
                     z = i[6].split()
-                    z[9] = "N/A N/A"
+                    z[9] = "NA NA"
                     i[6] = " ".join(z)
                 if int(i[6].split()[17].replace(',', '')) > 1 and int(i[6].split()[16].replace(',', '')) > 1:
                     data_of_web.append(dict(
@@ -92,10 +89,13 @@ while True:
         df = df_new.reset_index(drop=True)
         if 'social_score_old' in df.columns:
             df['social_score_change'] = df['social_score'] - df['social_score_old']
-            notnulls = df['social_score_change_percent'].notnull()
-            df.loc[notnulls, 'social_score_change_percent'] = ((df.loc[notnulls, 'social_score_change'] * 100 / df.loc[notnulls, 'social_score_old']) + df.loc[notnulls, 'social_score_change_percent']) / 2
-            isnulls = df['social_score_change_percent'].isnull()
-            df.loc[isnulls, 'social_score_change_percent'] = (df.loc[isnulls, 'social_score_change'] * 100 / df.loc[isnulls, 'social_score_old'])
+            if 'social_score_change_percent' in df.columns:
+                notnulls = df['social_score_change_percent'].notnull()
+                df.loc[notnulls, 'social_score_change_percent'] = ((df.loc[notnulls, 'social_score_change'] * 100 / df.loc[notnulls, 'social_score_old']) + df.loc[notnulls, 'social_score_change_percent']) / 2
+                isnulls = df['social_score_change_percent'].isnull()
+                df.loc[isnulls, 'social_score_change_percent'] = (df.loc[isnulls, 'social_score_change'] * 100 / df.loc[isnulls, 'social_score_old'])
+            else:
+                df['social_score_change_percent'] = df['social_score_change'] * 100 / df['social_score_old']
         df = df.assign(rate=0)
         for rank, asc in [["galaxy_score",False],["BullBear",False]]:
             df = df.sort_values(rank,ascending=asc,ignore_index=True)
@@ -103,8 +103,9 @@ while True:
                 df.loc[i, 'rate'] += (len(df)-i)
         df = df.sort_values("rate",ascending=False,ignore_index=True)
         df.insert(0, 'ID', range(1, 1+len(df)))
+        if 'ID_change' in df.columns:
+            df = df.rename({'ID_change': 'ID_2change'}, axis='columns')
         if 'ID_old' in df.columns:
-            df.rename({'ID_change': 'ID_2change'}, axis='columns')
             df['ID_change'] = df['ID_old'] - df['ID']
         
         print(df.head(30), time.ctime())
