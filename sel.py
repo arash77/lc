@@ -21,7 +21,6 @@ chrome_options.add_argument('--no-sandbox')
 chrome_options.add_argument('--disable-dev-shm-usage')
 chrome_options.add_experimental_option("detach", True)
 d = webdriver.Chrome(chrome_options=chrome_options)
-flag = False
 
 while True:
     try:
@@ -41,7 +40,6 @@ while True:
         d.find_element_by_xpath("//button[@type='submit']").click()
         WebDriverWait(d, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiAvatar-root')))
         time.sleep(5)
-        flag = True
     else:
         theList = WebDriverWait(d, 300).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableBody-root'))).text.splitlines()
         d.quit()
