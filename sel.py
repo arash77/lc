@@ -110,6 +110,7 @@ while True:
         df = df.sort_values("rate",ascending=False,ignore_index=True)
         df.insert(0, 'ID', range(1, 1+len(df)))
         if 'ID_change' in df.columns:
+            df = df.drop(['ID_2change'], axis='columns', errors='ignore')
             df = df.rename({'ID_change': 'ID_2change'}, axis='columns')
         if 'ID_old' in df.columns:
             df['ID_change'] = df['ID_old'] - df['ID']
