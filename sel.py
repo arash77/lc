@@ -30,7 +30,11 @@ while True:
         d = webdriver.Chrome(chrome_options=chrome_options)
     d.get("https://lunarcrush.com/markets?tv=gt_500k&rpp=500&ob=bullish_sentiment")
     time.sleep(5)
-    check = WebDriverWait(d, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableRow-root'))).text.splitlines()
+    try:
+        check = WebDriverWait(d, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableRow-root'))).text.splitlines()
+    except:
+        d.quit()
+        continue
     print(check, time.ctime())
     if 'Average Sentiment' not in check:
         d.find_elements_by_class_name("MuiButtonBase-root")[9].click()
@@ -41,10 +45,14 @@ while True:
         WebDriverWait(d, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiAvatar-root')))
         time.sleep(5)
     else:
-        theList = WebDriverWait(d, 300).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableBody-root'))).text.splitlines()
-        d.quit()
+        try:
+            theList = WebDriverWait(d, 300).until(EC.presence_of_element_located((By.CLASS_NAME, 'MuiTableBody-root'))).text.splitlines()
+            d.quit()
+        except:
+            d.quit()
+            continue
         if 'COIN OF THE DAY' in theList: theList.remove('COIN OF THE DAY')
-        data_of_web = list()
+        data_of_web = []
         list_of_coins = [theList[n:n+7] for n in range(0, len(theList), 7)]
         print(list_of_coins[-1], time.ctime())
         try:
@@ -72,15 +80,15 @@ while True:
             df_old = df_old.drop(['ID_old'], axis='columns', errors='ignore')
             df_old = df_old.rename({'ID': 'ID_old'}, axis='columns')
             df_new = df_new.set_index(['coin']).combine_first(df_old.set_index(['coin'])).reset_index()
-            
-        Markets = dict()
+
+        Markets = {}
         for exchange in ['coinex','binance','huobipro']:
             try:
                 Markets[exchange] = [market['base'] for market in getattr(ccxt, exchange)({'timeout': 5000,'enableRateLimit': True}).fetchMarkets() if market['quote'] == "USDT"]
             except Exception as e:
                 print(e, time.ctime())
 
-        df_new['exchange'] = df_new['coin'].apply(lambda row: ",".join([exch for exch, j in Markets.items() if row in j]))
+        df_new['exchange'] = df_new['coin'].apply(lambda row: ",".join(exch for exch, j in Markets.items() if row in j))
         df_new['exchange'].replace('', np.nan, inplace=True)
         df_new = df_new.dropna(subset=['exchange'])
 
@@ -105,7 +113,7 @@ while True:
             df = df.rename({'ID_change': 'ID_2change'}, axis='columns')
         if 'ID_old' in df.columns:
             df['ID_change'] = df['ID_old'] - df['ID']
-        
+
         print(df.head(30), time.ctime())
         df.to_csv('data.csv',index=False)
         r.set('records',pickle.dumps(df[['coin', 'BullBear', 'exchange', 'galaxy_score', 'rate', 'social_score']].to_dict('records')))
